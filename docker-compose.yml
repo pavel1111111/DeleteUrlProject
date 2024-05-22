@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  urlclient:
+    build: ./urlClient
+    ports:
+      - "3000:80"
+    container_name: urlclient
+
+  urlwebserver:
+    build: ./urlWebServer
+    container_name: urlwebserver
+    ports:
+      - "80:80"
+    depends_on:
+      - urlbackserver
+      - urlclient
+
+  urlbackserver:
+    build:
+      context: .
+      dockerfile: urlService/Dockerfile
+    expose:
+      - 8000
+    container_name: urlbackserver

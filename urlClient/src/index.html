@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список текстов</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>СПИСОК ТЕКСТОВ</h1>
+    <ul id="textsList"></ul>
+    <p id="noTextsMessage" style="display: none;">Нет доступных текстов</p>
+
+    <script>
+        const baseUrl = "http://localhost/api";
+
+        const refreshList = () => {
+            $("#textsList").html("");
+            $.getJSON(`${baseUrl}/texts/`, function (data) {
+                if (data.length === 0) {
+                    $("#noTextsMessage").show();
+                } else {
+                    $("#noTextsMessage").hide();
+                    for (let i = 0; i < data.length; i++) {
+                        let textButton = $("<button data-id='" + data[i].id + "' class='moreBtn'>" + data[i].name + "</button>");
+                        textButton.click(function() {
+                            window.location.href = `text.html?id=${data[i].id}`;
+                        });
+                        $("#textsList").append(textButton);
+                    }
+                }
+            });
+        };
+
+        $(document).ready(function () {
+            refreshList();
+        });
+    </script>
+    <a href="new_text.html">Добавить текст</a>
+</body>
+</html>

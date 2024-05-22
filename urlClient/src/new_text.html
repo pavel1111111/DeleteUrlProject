@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление текста</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+
+    </style>
+</head>
+<body>
+    <h1>Добавление текста</h1>
+    <form id="add-text-form">
+        <label for="text-title">Название текста:</label>
+        <input type="text" id="text-title" name="text-title" required>
+
+        <label for="text-content">Содержание текста:</label>
+        <textarea id="text-content" name="text-content" required></textarea>
+
+        <button type="submit">Добавить</button>
+    </form>
+
+    <script>
+        const baseUrl = "http://localhost/api/texts/";
+
+        $('#add-text-form').submit(function(event) {
+            event.preventDefault(); // Предотвращаем стандартное поведение формы (перезагрузку страницы)
+
+            const title = $('#text-title').val();
+            const content = $('#text-content').val();
+
+            // Проверяем, что поля не пустые
+            if (!title || !content) {
+                alert('Пожалуйста, заполните все поля.');
+                return;
+            }
+
+            // Отправляем POST запрос на сервер для добавления текста
+            $.ajax({
+                url: baseUrl,
+                method: 'post',
+                contentType: 'application/json',
+                data: JSON.stringify({ "name": title, "text": content }),
+                success: function(response) {
+                    alert('Текст успешно добавлен!');
+                    // Очистить форму после успешного добавления текста
+                    $('#text-title').val('');
+                    $('#text-content').val('');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка при добавлении текста:', status, error);
+                }
+            });
+        });
+    </script>
+    <a href="index.html">Вернуться к списку</a>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о тексте</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #textInfo {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        #textInfo p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
+
+        #findUrlsButton {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        #textWithoutUrlsButton {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        #deleteTextButton {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        a {
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .result {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            display: none;
+        }
+
+        .copy-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Информация о тексте</h1>
+    <div id="textInfo"></div>
+    <div class="button-container">
+        <button id="findUrlsButton">Найти URL</button>
+        <button id="textWithoutUrlsButton">Текст без URL</button>
+        <button id="deleteTextButton">Удалить текст</button>
+    </div>
+    <div id="findUrlsResult" class="result"></div>
+    <div id="textWithoutUrlsResult" class="result">
+        <button id="copyTextButton" class="copy-button">Скопировать текст</button>
+    </div>
+    <a href="index.html">Вернуться к списку</a>
+
+    <script>
+        const baseUrl = "http://localhost/api";
+
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const textId = urlParams.get('id');
+
+            if (textId) {
+                $.getJSON(`${baseUrl}/texts/${textId}`, function(data) {
+                    $('#textInfo').html(`
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Название:</strong> ${data.name}</p>
+                        <p><strong>Содержание:</strong> ${data.text}</p>
+                    `);
+                });
+
+                $('#findUrlsButton').click(function() {
+                    $.getJSON(`${baseUrl}/texts/${textId}/findurls`, function(data) {
+                        const urls = data.urls;
+                        const count = urls.length;
+                        $('#findUrlsResult').html(`Найдено ${count} URL: ${urls.join(', ')}`).show();
+                    });
+                });
+
+                $('#textWithoutUrlsButton').click(function() {
+                    $.getJSON(`${baseUrl}/texts/${textId}/deleteurls`, function(data) {
+                        $('#textWithoutUrlsResult').html(`
+                            <p>Текст без URL: ${data.text}</p>
+                            <button id="copyTextButton" class="copy-button">Скопировать текст</button>
+                        `).show();
+
+                        $('#copyTextButton').click(function() {
+                            navigator.clipboard.writeText(data.text).then(function() {
+                                alert('Текст скопирован в буфер обмена');
+                            }, function(err) {
+                                console.error('Ошибка при копировании текста: ', err);
+                            });
+                        });
+                    });
+                });
+
+                $('#deleteTextButton').click(function() {
+                    $.ajax({
+                        url: `${baseUrl}/texts/${textId}/deletetext`,
+                        type: 'DELETE',
+                        success: function() {
+                            alert('Текст успешно удален');
+                            window.location.href = 'index.html';
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Ошибка при удалении текста:', status, error);
+                        }
+                    });
+                });
+            } else {
+                $('#textInfo').html('<p>Текст не найден.</p>');
+            }
+        });
+    </script>
+</body>
+</html>
