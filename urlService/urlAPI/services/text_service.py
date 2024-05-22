@@ -19,6 +19,15 @@ class TextService:
         return texts[id]
 
     def add_text(self, text: Text):
+        existing_names = [t.name for t in texts.values()]
+        name = text.name
+        if text.name in existing_names:
+            i = 1
+            new_name = f"{name} ({i})"
+            while new_name in existing_names:
+                i += 1
+                new_name = f"{name} ({i})"
+            text.name = new_name
         texts[text.id] = text
         return text
 
