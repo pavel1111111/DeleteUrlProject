@@ -59,7 +59,7 @@
     </div>
     <div id="findUrlsResult" class="result"></div>
     <div id="textWithoutUrlsResult" class="result">
-        <button id="copyTextButton" class="copy-button">Скопировать текст</button>
+        <button id="copyTextButtonWithoutUrls" class="copy-button">Скопировать текст</button>
     </div>
     <a href="index.html">Вернуться к списку</a>
 
@@ -75,15 +75,31 @@
                     $('#textInfo').html(`
                         <p><strong>ID:</strong> ${data.id}</p>
                         <p><strong>Название:</strong> ${data.name}</p>
-                        <p><strong>Содержание:</strong> ${data.text}</p>
+                        <p><strong>Содержание:</strong> <span id="textContent">${data.text}</span></p>
+                        <button id="copyTextButton" class="copy-button">Скопировать текст</button>
                     `);
+
+                    $('#copyTextButton').click(function() {
+                        const text = $('#textContent').text();
+                        navigator.clipboard.writeText(text).then(function() {
+                            alert('Текст скопирован в буфер обмена');
+                        }, function(err) {
+                            console.error('Ошибка при копировании текста: ', err);
+                        });
+                    });
                 });
 
                 $('#findUrlsButton').click(function() {
                     $.getJSON(`${baseUrl}/texts/${textId}/findurls`, function(data) {
                         const urls = data.urls;
                         const count = urls.length;
-                        $('#findUrlsResult').html(`Найдено ${count} URL: ${urls.join(', ')}`).show();
+                        if (count > 0) {
+                            $('#findUrlsResult').html(`Найдено ${count} URL: ${urls.join(', ')}`).show();
+                        } else {
+                            $('#findUrlsResult').html('URL в тексте не обнаружено').show();
+                        }
+                    }).fail(function() {
+                        $('#findUrlsResult').html('Произошла ошибка при поиске URL.').show();
                     });
                 });
 
@@ -91,10 +107,10 @@
                     $.getJSON(`${baseUrl}/texts/${textId}/deleteurls`, function(data) {
                         $('#textWithoutUrlsResult').html(`
                             <p>Текст без URL: ${data.text}</p>
-                            <button id="copyTextButton" class="copy-button">Скопировать текст</button>
+                            <button id="copyTextButtonWithoutUrls" class="copy-button">Скопировать текст</button>
                         `).show();
 
-                        $('#copyTextButton').click(function() {
+                        $('#copyTextButtonWithoutUrls').click(function() {
                             navigator.clipboard.writeText(data.text).then(function() {
                                 alert('Текст скопирован в буфер обмена');
                             }, function(err) {
@@ -106,7 +122,7 @@
 
                 $('#deleteTextButton').click(function() {
                     $.ajax({
-                        url: `${baseUrl}/texts/${textId}/deletetext`,
+                        url: `${baseUrl}/texts/${textId}`,
                         type: 'DELETE',
                         success: function() {
                             alert('Текст успешно удален');

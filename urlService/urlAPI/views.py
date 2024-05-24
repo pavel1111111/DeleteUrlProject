@@ -47,8 +47,7 @@ class TextViewSet(ViewSet):
         try:
             text = self.text_service.get_text_by_id(id)
             updated_text = delete_urls(text.text)
-            text.text = updated_text
-            serializer = TextWithoutURLSSerializer(text)
+            serializer = TextWithoutURLSSerializer({'text': updated_text})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except KeyError:
             return Response({"detail": "Text not found."}, status=status.HTTP_404_NOT_FOUND)

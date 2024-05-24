@@ -12,7 +12,6 @@ COPY  urlService/urlAPI /app/urlAPI
 COPY urlService/urlService /app/urlService
 COPY urlService/manage.py /app/manage.py
 COPY urlService/uwsgi.ini /app/uwsgi.ini
-COPY urlService/tests /app/tests
 WORKDIR /app
 
 RUN python manage.py migrate
